@@ -1,5 +1,7 @@
+require "faker"
+
 FactoryGirl.define do
-  factory :venue do
+  factory :venue, class: Calagator::Venue do
     sequence(:title) { |n| "Venue #{n}" }
     sequence(:description) { |n| "Description of Venue #{n}." }
     sequence(:address) { |n| "Address #{n}" }
@@ -16,20 +18,22 @@ FactoryGirl.define do
     closed false
     wifi true
     access_notes "Access permitted."
+    after(:create) { Sunspot.commit if Calagator::Venue::SearchEngine.kind == :sunspot }
   end
 
-  factory :event do
+  factory :event, class: Calagator::Event do
     sequence(:title) { |n| "Event #{n}" }
     sequence(:description) { |n| "Description of Event #{n}." }
-    start_time { Time.now + 1.hour }
-    end_time { self.start_time + 1.hours }
+    start_time { Time.zone.now.beginning_of_day }
+    end_time { start_time + 1.hour }
+    after(:create) { Sunspot.commit if Calagator::Event::SearchEngine.kind == :sunspot }
+
+    trait :with_venue do
+      association :venue
+    end
   end
 
-  factory :event_with_venue, :parent => :event do
-    association :venue
-  end
-
-  factory :duplicate_event, :parent => :event do
-    association :duplicate_of, :factory => :event
+  factory :duplicate_event, parent: :event do
+    association :duplicate_of, factory: :event
   end
 end

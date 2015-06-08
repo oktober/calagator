@@ -1,12 +1,18 @@
-# Add your own tasks in files placed in lib/tasks ending in .rake,
-# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
+#!/usr/bin/env rake
+if !File.exist?("spec/dummy")
+  puts "Missing dummy app in spec/dummy! Run `bundle exec bin/calagator new spec/dummy --dummy` to generate one."
+  exit 1
+end
 
-require File.expand_path('../config/application', __FILE__)
+require 'bundler/setup'
 
-require 'rake'
-# require 'rake/testtask'
-# require 'rdoc/task'
+APP_RAKEFILE = File.expand_path("../spec/dummy/Rakefile", __FILE__)
+load 'rails/tasks/engine.rake'
 
-# require 'tasks/rails'
+Bundler::GemHelper.install_tasks
 
-Calagator::Application.load_tasks
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec)
+
+task :spec => 'app:db:test:prepare'
+task :default => :spec

@@ -1,16 +1,23 @@
-Calagator::Application.routes.draw do
-  match 'omfg' => 'site#omfg'
-  match 'hello' => 'site#hello'
+Calagator::Engine.routes.draw do
+  get 'omfg' => 'site#omfg'
+  get 'hello' => 'site#hello'
 
-  match 'about' => 'site#about'
+  get 'about' => 'site#about'
 
-  match 'opensearch.:format' => 'site#opensearch'
+  get 'opensearch.:format' => 'site#opensearch'
+  get 'defunct' => 'site#defunct'
+
+  get 'admin' => 'admin#index'
+  get "admin/index"
+  get "admin/events"
+  post "lock_event" => "admin#lock_event"
 
   resources :events do
     collection do
       post :squash_many_duplicates
       get :search
       get :duplicates
+      get 'tag/:tag', to: :search, as: :tag
     end
 
     member do
@@ -29,19 +36,20 @@ Calagator::Application.routes.draw do
       post :squash_many_duplicates
       get :map
       get :duplicates
+      get :autocomplete
+      get 'tag/:tag', to: :search, as: :tag
     end
   end
 
   resources :versions, :only => [:edit]
   resources :changes, :controller => 'paper_trail_manager/changes'
-  match 'recent_changes' => redirect("/changes")
-  match 'recent_changes.:format' => redirect("/changes.%{format}")
+  get 'recent_changes' => redirect("/changes")
+  get 'recent_changes.:format' => redirect("/changes.%{format}")
 
-  match 'css/:name' => 'site#style'
-  match 'css/:name.:format' => 'site#style'
+  get 'css/:name' => 'site#style'
+  get 'css/:name.:format' => 'site#style'
 
-  match '/' => 'site#index', :as => :root
-  match '/index' => 'site#index'
-  match '/index.:format' => 'site#index'
-
+  get '/' => 'site#index', :as => :root
+  get '/index' => 'site#index'
+  get '/index.:format' => 'site#index'
 end
